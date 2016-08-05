@@ -1,0 +1,34 @@
+
+personal-bonus.png
+size: 2048,128
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+Hidden
+  rotate: false
+  xy: 1012, 21
+  size: 178, 56
+  orig: 178, 56
+  offset: 0, 0
+  index: -1
+Icon
+  rotate: false
+  xy: 702, 3
+  size: 308, 74
+  orig: 308, 74
+  offset: 0, 0
+  index: -1
+Mercury
+  rotate: false
+  xy: 1, 1
+  size: 625, 32
+  orig: 625, 32
+  offset: 0, 0
+  index: -1
+Thermometer
+  rotate: false
+  xy: 1, 35
+  size: 699, 42
+  orig: 699, 42
+  offset: 0, 0
+  index: -1
