@@ -5,25 +5,23 @@ package gdx.game.template.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.assets.loaders.SkinLoader;
-import com.badlogic.gdx.assets.loaders.TextureLoader;
-import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
-import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureWrap;
-import com.badlogic.gdx.graphics.g2d.*;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar.ProgressBarStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-
-
-import java.util.*;
 
 import gdx.game.template.MyGame;
 
@@ -40,23 +38,16 @@ public class LoadingScreen implements Screen {
     Sprite BackgroundSprite;
     SpriteBatch batch;
 
-    public Map<String,BitmapFont> fontsByName;
-
     protected BitmapFont font = null;
     GlyphLayout layout = new GlyphLayout(); //get font width in newer libgdx
 
     private TextureAtlas initialAtlas = null;
     private Sprite[] circles = null;
     private float[] rotations = null;
-    private float previousProgress = 0;
-    boolean update = true;
     public static LoadingScreen instance = null;
     private boolean isInitialLoading = true;
     private float initialLoadingDuration = 10f;
-    private float[] gameLoadingDuration = null;
-    private boolean useRealLoadingDuration = false;
-    public int loadGameIndex = 0;
-    public String loadGameName = "";
+    private boolean useRealLoadingDuration = true;
 
     protected float time = 0;
     public LoadingScreen(final MyGame game,Skin skin, BitmapFont font) {
@@ -70,7 +61,7 @@ public class LoadingScreen implements Screen {
 
         Texture background = new Texture("loading/LoadBG.png");
         background.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
-        BackgroundSprite = new Sprite(background, 0, 0, MyGame.SCREEN_WIDTH*2, MyGame.SCREEN_HEIGHT);
+        BackgroundSprite = new Sprite(background, 0, 0, MyGame.SCREEN_WIDTH, MyGame.SCREEN_HEIGHT);
 
         stage = new Stage();
         batch = new SpriteBatch();
@@ -85,7 +76,7 @@ public class LoadingScreen implements Screen {
         pixmap.fill();
         skin.add("white", new Texture(pixmap));
 
-        barStyle = new ProgressBarStyle(skin.newDrawable("white", Color.DARK_GRAY), skin.newDrawable("white", Color.GREEN));
+        barStyle = new ProgressBarStyle(skin.newDrawable("white", Color.WHITE), skin.newDrawable("white", Color.GREEN));
         barStyle.knobBefore = barStyle.knob;
         bar = new ProgressBar(0, 100, 1f, false, barStyle);
         bar.setPosition(MyGame.SCREEN_WIDTH/2-MyGame.SCREEN_WIDTH/4, MyGame.SCREEN_HEIGHT/2);
@@ -112,35 +103,19 @@ public class LoadingScreen implements Screen {
         LoadAssets();
     }
 
-    public Map<String,BitmapFont> initFonts() {
-
-        FileHandle fontFile = Gdx.files.internal("arial.ttf");
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(fontFile);
-
-        Map<String,BitmapFont> fontsByName = new HashMap<String,BitmapFont>();
-        FreeTypeFontGenerator.FreeTypeFontParameter param = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        float ppi = Gdx.graphics.getPpiY();
-        param.size = Math.round( ppi / 2);
-        fontsByName.put( "huge-font", generator.generateFont( param ));
-        param.size = Math.round( ppi / 3);
-        fontsByName.put( "big-font", generator.generateFont( param ));
-        param.size = Math.round( ppi / 4);
-        fontsByName.put( "small-font", generator.generateFont( param ));
-        generator.dispose();
-        return fontsByName;
-    }
-
+    /**
+     * Put Assets to loading here
+     */
     private void LoadAssets() {
 
         MyGame.loading = this;
-        //Service Screen ASSETS
-        //if(MyGame.manager!= null)
         MyGame.manager.load("loading/uiskin.atlas", TextureAtlas.class);
         MyGame.manager.load("loading/uiskin.json", Skin.class );
-
-        //CASH SOUND
-
-        //USER SCREEN
+        MyGame.manager.load("loading/game-loader.atlas", TextureAtlas.class );
+        MyGame.manager.load("loading/initial-loader.atlas", TextureAtlas.class );
+        MyGame.manager.load("loading/loader.atlas", TextureAtlas.class );
+        MyGame.manager.load("loading/default.fnt", BitmapFont.class );
+        MyGame.manager.load("badlogic.jpg",Texture.class);
 
         MyGame.doneLoading = LoadingStatus.STARTED;
     }
@@ -157,26 +132,29 @@ public class LoadingScreen implements Screen {
         font.draw(batch, text, x - layout.width / 2, y + layout.height / 2);
     }
 
+    /**
+     * Render progress of loading
+     * @param delta - gdx delta time
+     */
     @Override
     public void render(float delta) {
-//		logger.debug("time: {}", time);
 
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         batch.begin();
-        batch.draw(BackgroundSprite, 0, 0);
+        batch.draw(BackgroundSprite, 0, 0,MyGame.SCREEN_WIDTH,MyGame.SCREEN_HEIGHT);
 
         batch.draw(initialAtlas.findRegion("Logo"), 632, 663);
 
         //camera.update();
 
-        if(MyGame.doneLoading == LoadingStatus.NOT_STARTED){
+/*        if(MyGame.doneLoading == LoadingStatus.NOT_STARTED){
             writeToCenter("Trying to connect to server", 841, 50);
             batch.end();
             return;
         }
-
+*/
         batch.end();
 
         if (MyGame.doneLoading != LoadingStatus.DONE) {
@@ -243,8 +221,13 @@ public class LoadingScreen implements Screen {
         time += delta;
     }
 
+    /**
+     * will be ran when loading finished
+     */
     private void finishLoadingGame() {
         // it is important the GameGreen gets new instance when assets are reloaded
+        MyGame.menu = new MenuScreen();
+        MyGame.instance.setScreen(MyGame.menu);
 
     }
 

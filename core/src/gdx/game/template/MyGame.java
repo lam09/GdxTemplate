@@ -15,7 +15,6 @@ public class MyGame extends Game {
 	public static final int SCREEN_HEIGHT =  1050;
 	public static MyGame instance;
 
-	public static String[] GAMES_LOADED;
 	public static LoadingScreen.LoadingStatus doneLoading = LoadingScreen.LoadingStatus.NOT_STARTED;
 
 	public static LoadingScreen loading;
@@ -38,6 +37,7 @@ public class MyGame extends Game {
 		skin = new Skin(Gdx.files.internal("loading/uiskin.json"),textureAtlas);
 		loading = new LoadingScreen(this, skin, font);
 		setScreen(loading);
+		instance = this;
 	}
 
 	@Override
