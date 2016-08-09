@@ -42,6 +42,7 @@ public class AndroidLauncher extends AndroidApplication {
 
 			}
 		};
+
 	}
 
 }

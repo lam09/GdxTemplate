@@ -2,11 +2,13 @@ package gdx.game.template.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import gdx.game.template.MyGame;
+import gdx.game.template.gameItems.Basket;
 
 /**
  * Created by a.lam.tuan on 5. 8. 2016.
@@ -14,11 +16,22 @@ import gdx.game.template.MyGame;
 public class MenuScreen implements Screen {
     Texture texture;
     private SpriteBatch batch;
+    Sound backgroundSound;
+    Basket basket ;
     public MenuScreen() {
         texture = MyGame.manager.get("badlogic.jpg",Texture.class);
+        backgroundSound = MyGame.manager.get("sound/background.mp3", Sound.class);
         batch = new SpriteBatch();
+        backgroundSound.loop(0.5f);
+        basket = new Basket();
     }
 
+    public void update(float delta){
+        if(Gdx.input.justTouched())
+        {
+            MyGame.instance.setScreen(basket);
+        }
+    }
     @Override
     public void show() {
 
@@ -28,8 +41,10 @@ public class MenuScreen implements Screen {
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        update(delta);
         batch.begin();
         batch.draw(texture,0,0);
+
         batch.end();
     }
 
