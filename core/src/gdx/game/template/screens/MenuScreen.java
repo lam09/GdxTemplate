@@ -2,6 +2,7 @@ package gdx.game.template.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -16,13 +17,13 @@ import gdx.game.template.gameItems.Basket;
 public class MenuScreen implements Screen {
     Texture texture;
     private SpriteBatch batch;
-    Sound backgroundSound;
+    Music backgroundSound;
     Basket basket ;
     public MenuScreen() {
         texture = MyGame.manager.get("badlogic.jpg",Texture.class);
-        backgroundSound = MyGame.manager.get("sound/background.mp3", Sound.class);
+        backgroundSound = MyGame.manager.get("sound/background.mp3", Music.class);
         batch = new SpriteBatch();
-        backgroundSound.loop(0.5f);
+        backgroundSound.play(  );
         basket = new Basket();
     }
 

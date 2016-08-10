@@ -1,13 +1,18 @@
-package gdx.game.template.location;
+package gdx.game.template;
 
-import gdx.game.template.MyGame;
+import android.location.LocationListener;
+import android.location.LocationManager;
 
 /**
  * Created by Lam on 8/6/2016.
  */
 public class LocationThread extends Thread {
+    LocationManager locationManager;
+    LocationListener locationListener;
 
+    public LocationThread(){
 
+    }
     //GPSTraker
     @Override
     public void run(){
@@ -19,5 +24,10 @@ public class LocationThread extends Thread {
             }
 
         }
+    }
+
+    private void printLocation()
+    {
+
     }
 }

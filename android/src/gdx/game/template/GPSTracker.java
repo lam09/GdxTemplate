@@ -49,7 +49,7 @@ public final class GPSTracker implements LocationListener {
         this.mContext = context;
         instance = this;
         getLocation();
-        LocationThread.a++;
+      //  LocationThread.a++;
     }
 
     /**
